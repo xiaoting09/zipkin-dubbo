@@ -1,0 +1,24 @@
+allprojects {
+    group = 'com.xiao'
+    version = '1.0.0-SNAPSHOT'
+    ext {
+        springVersion = '4.3.0.RELEASE'
+        braveVersion="4.7.1"
+        reporterVersion="1.1.1"
+    }
+    tasks.withType(AbstractCompile) {
+        options.encoding = "UTF-8"
+    }
+}
+subprojects {
+    apply plugin: 'java'
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    repositories {
+        maven { url "http://maven.aliyun.com/nexus/content/groups/public" }
+        jcenter()
+        mavenLocal()
+        mavenCentral()
+    }
+
+}

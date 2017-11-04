@@ -1,0 +1,3 @@
+rootProject.name = 'zipkin-dubbo'
+include 'dubbo-common'
+
