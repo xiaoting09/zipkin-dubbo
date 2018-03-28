@@ -63,12 +63,12 @@ public class TracingConfig {
         String sampledString = carrier.get(DubboTraceConst.SAMPLED_NAME);
 
         Boolean sampled = sampledString != null
-                ? sampledString.equals("1") || sampledString.equalsIgnoreCase("true")
+                ? "1".equals(sampledString) || "true".equalsIgnoreCase(sampledString)
                 : null;
         boolean debug = "1".equals(carrier.get(DubboTraceConst.FLAGS_NAME));
 
         String traceIdString = carrier.get(DubboTraceConst.TRACE_ID_NAME);
-        if (traceIdString == null) { // return early if there's no trace ID
+        if (traceIdString == null) {
             return TraceContextOrSamplingFlags.create(
                     new SamplingFlags.Builder().sampled(true).debug(debug).build()
             );
@@ -94,11 +94,9 @@ public class TracingConfig {
     private brave.Span nextSpan(TraceContextOrSamplingFlags contextOrFlags) {
         TraceContext extracted = contextOrFlags.context();
         if (extracted != null) {
-            // If there were trace IDs in the request and a sampling decision, honor it
             if (extracted.sampled() != null) {
                 return tracer.joinSpan(contextOrFlags.context());
             }
-            // Otherwise, try to make a new decision
             return tracer.joinSpan(extracted.toBuilder()
                     .sampled(SamplingFlags.SAMPLED.sampled())
                     .build());
