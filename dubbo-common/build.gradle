@@ -6,6 +6,7 @@ dependencies {
     }
     compile group: 'io.zipkin.brave', name: 'brave-spancollector-http', version:"$braveVersion"
     compile group: 'io.zipkin.brave', name: 'brave-instrumentation-http', version:"$braveVersion"
+    compile group: 'io.zipkin.reporter', name:'zipkin-sender-kafka10', version:'1.0.0'
 
     compile group: 'io.zipkin.brave', name: 'brave-instrumentation-parent', version:"$braveVersion"
     compile group: 'io.zipkin.reporter', name: 'zipkin-sender-urlconnection', version:"1.1.1"

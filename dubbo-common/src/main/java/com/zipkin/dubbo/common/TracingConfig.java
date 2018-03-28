@@ -8,6 +8,8 @@ import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
 import com.alibaba.dubbo.rpc.RpcContext;
 import zipkin.reporter.AsyncReporter;
+import zipkin.reporter.Encoding;
+import zipkin.reporter.kafka10.KafkaSender;
 import zipkin.reporter.urlconnection.URLConnectionSender;
 import zipkin2.Endpoint;
 import zipkin2.Span;
@@ -27,13 +29,21 @@ public class TracingConfig {
         getTracer();
     }
 
+    /**
+     * kafka接受
+     */
+    public static final String KAFKA_CONTROLLER = "Kafka_Controller";
+    /**
+     * http接受
+     */
+    public static final String HTTP_CONTROLLER = "http_Controller";
+
+
     private static Tracer tracer;
 
     private static HttpTracing httpTracing() {
-        URLConnectionSender json = URLConnectionSender.json(PropertiesUtils.getProperty(DubboTraceConst.ZIP_CONF_URL) + "/api/v2/spans");
-        AsyncReporter<Span> spanAsyncReporter = AsyncReporter.v2(json);
         Tracing myService = Tracing.newBuilder().localServiceName(getServiceName())
-                .spanReporter(spanAsyncReporter)
+                .spanReporter(getReporter())
                 .build();
         return HttpTracing.newBuilder(myService).build();
     }
@@ -136,5 +146,24 @@ public class TracingConfig {
             return true;
         }
         return false;
+    }
+
+    private static AsyncReporter<Span> getReporter() {
+        String kafkaUrl = PropertiesUtils.getProperty(DubboTraceConst.ZIP_KAFKA_CONF_URL);
+        if (kafkaUrl==null || kafkaUrl.trim().length()==0){
+            return sendHttpController();
+        } else {
+            return sendKafkaController();
+        }
+    }
+
+    private static AsyncReporter<Span> sendKafkaController() {
+        KafkaSender kafkaSender = KafkaSender.create(PropertiesUtils.getProperty(DubboTraceConst.ZIP_KAFKA_CONF_URL)).toBuilder().encoding(Encoding.JSON).build();
+        return AsyncReporter.builder(kafkaSender).buildV2();
+    }
+
+    private static AsyncReporter<Span> sendHttpController() {
+        URLConnectionSender json = URLConnectionSender.json(PropertiesUtils.getProperty(DubboTraceConst.ZIP_CONF_URL) + "/api/v2/spans");
+        return AsyncReporter.v2(json);
     }
 }

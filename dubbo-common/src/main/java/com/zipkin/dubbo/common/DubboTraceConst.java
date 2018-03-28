@@ -40,5 +40,9 @@ public class DubboTraceConst {
      * 服务名称
      */
     public static final String ZIP_CONF_NAME = "zipkin.serviceName";
+    /**
+     * KAFKA 服务器地址
+     */
+    public static final String ZIP_KAFKA_CONF_URL = "kafka.serviceUrl";
 
 }
