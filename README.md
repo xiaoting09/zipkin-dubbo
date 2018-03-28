@@ -17,9 +17,9 @@ traceFiltercClient=com.zipkin.dubbo.DrpcClientInterceptor(消费者)
 
 4.在config.properties，或者application.properties文件中配置
 ```
-zipkin.serviceUrl（zipkin服务器地址）
-zipkin.serviceName(当前服务名称)
-kafka.serviceUrl(kafka服务器地址)
+zipkin.serviceUrl=zipkin服务器地址
+zipkin.serviceName=当前服务名称
+kafka.serviceUrl=kafka服务器地址
 ```
 
 5、如果配置了kafka.serviceUrl地址,则默认使用kafkaController
