@@ -5,6 +5,7 @@ import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.extension.Activate;
 import com.alibaba.dubbo.rpc.*;
 import com.zipkin.dubbo.common.TracingConfig;
+import com.zipkin.dubbo.common.TracingThreadLocal;
 
 import java.util.Map;
 
@@ -24,6 +25,7 @@ public class DrpcServerInterceptor extends DrpcAbstractInterceptor {
             String path = RpcContext.getContext().getMethodName();
             span.kind(brave.Span.Kind.PRODUCER).name("rpc-producer-" + path);
             span.annotate(System.currentTimeMillis(), zipkin.Constants.SERVER_RECV);
+            TracingThreadLocal.set(span.context());
             span.start();
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -38,6 +40,7 @@ public class DrpcServerInterceptor extends DrpcAbstractInterceptor {
             }
             span.annotate(System.currentTimeMillis(), zipkin.Constants.SERVER_SEND);
             span.finish();
+            TracingThreadLocal.close();
         }
     }
 }

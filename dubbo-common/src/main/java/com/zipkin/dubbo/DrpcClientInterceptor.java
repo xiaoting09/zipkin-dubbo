@@ -11,6 +11,7 @@ import com.alibaba.dubbo.rpc.*;
 import com.github.kristofa.brave.IdConversion;
 import com.zipkin.dubbo.common.DubboTraceConst;
 import com.zipkin.dubbo.common.TracingConfig;
+import com.zipkin.dubbo.common.TracingThreadLocal;
 
 import java.util.Map;
 
@@ -28,6 +29,8 @@ public class DrpcClientInterceptor extends DrpcAbstractInterceptor {
             Map<String, String> at = invocation.getAttachments();
             Tracer tracer = Tracing.currentTracer();
             TraceContext traceContext = null;
+            TraceContext context = TracingThreadLocal.get();
+            Long currenSpanId = null;
             if (tracer == null) {
                 span = TracingConfig.getSingle().handleReceive(at);
                 traceContext = Tracing.current().currentTraceContext().get();
@@ -36,18 +39,29 @@ public class DrpcClientInterceptor extends DrpcAbstractInterceptor {
                     span = Tracing.current().tracer().toSpan(traceContext);
                 }
             } else {
-                span = tracer.nextSpan();
-                spanInScope = tracer.withSpanInScope(span);
-                traceContext = Tracing.current().currentTraceContext().get();
+                Span currentSpan = tracer.currentSpan();
+                if (currentSpan != null) {
+                    currenSpanId = currentSpan.context().spanId();
+                }
+                if (currenSpanId == null && context != null) {
+                    currenSpanId = context.spanId();
+                    this.span = tracer.joinSpan(context);
+                } else {
+                    this.span = tracer.nextSpan();
+                    spanInScope = tracer.withSpanInScope(this.span);
+                }
+                traceContext = span.context();
             }
             span.kind(Span.Kind.CONSUMER);
             span.name("rpc-consumer-" + invocation.getMethodName());
             span.annotate(System.currentTimeMillis(), zipkin.Constants.CLIENT_SEND);
             if (traceContext != null) {
                 span.start();
+                if (currenSpanId != null) {
+                    at.put(DubboTraceConst.PARENT_SPAN_ID_NAME, IdConversion.convertToString(currenSpanId));
+                }
                 at.put(DubboTraceConst.SPAN_ID_NAME, IdConversion.convertToString(traceContext.spanId()));
                 at.put(DubboTraceConst.TRACE_ID_NAME, traceContext.traceIdString());
-                at.put(DubboTraceConst.PARENT_SPAN_ID_NAME, "1");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -62,6 +76,7 @@ public class DrpcClientInterceptor extends DrpcAbstractInterceptor {
                 spanInScope.close();
             }
             span.finish();
+            TracingThreadLocal.close();
         }
     }
 
@@ -74,5 +89,6 @@ public class DrpcClientInterceptor extends DrpcAbstractInterceptor {
                 .traceId(nextId)
                 .spanId(nextId).build();
     }
+
 
 }
