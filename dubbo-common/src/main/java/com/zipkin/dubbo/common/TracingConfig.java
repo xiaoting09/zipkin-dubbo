@@ -6,6 +6,7 @@ import brave.http.HttpTracing;
 import brave.propagation.SamplingFlags;
 import brave.propagation.TraceContext;
 import brave.propagation.TraceContextOrSamplingFlags;
+import com.alibaba.dubbo.common.utils.ConfigUtils;
 import com.alibaba.dubbo.rpc.RpcContext;
 import zipkin.reporter.AsyncReporter;
 import zipkin.reporter.Encoding;
@@ -64,9 +65,7 @@ public class TracingConfig {
 
 
     private static String getServiceName() {
-        String defaultName = RpcContext.getContext().getMethodName();
-        String serviceName = PropertiesUtils.getProperty(DubboTraceConst.ZIP_CONF_NAME);
-        return serviceName == null || serviceName.trim().length() == 0 ? defaultName : serviceName;
+        return ConfigUtils.getProperty("dubbo.application.name");
     }
 
     private TraceContextOrSamplingFlags extract(Map<String, String> carrier) {
