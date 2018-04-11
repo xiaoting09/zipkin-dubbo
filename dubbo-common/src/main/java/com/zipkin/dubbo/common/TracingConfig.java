@@ -65,7 +65,12 @@ public class TracingConfig {
 
 
     private static String getServiceName() {
-        return ConfigUtils.getProperty("dubbo.application.name");
+        String applicationName = ConfigUtils.getProperty("dubbo.application.name");
+        String serviceName = PropertiesUtils.getProperty(DubboTraceConst.ZIP_CONF_NAME);
+        if (applicationName == null || applicationName.trim().length() == 0) {
+            applicationName =  RpcContext.getContext().getMethodName();
+        }
+        return serviceName == null || serviceName.trim().length() == 0 ? applicationName : serviceName;
     }
 
     private TraceContextOrSamplingFlags extract(Map<String, String> carrier) {
@@ -149,7 +154,7 @@ public class TracingConfig {
 
     private static AsyncReporter<Span> getReporter() {
         String kafkaUrl = PropertiesUtils.getProperty(DubboTraceConst.ZIP_KAFKA_CONF_URL);
-        if (kafkaUrl==null || kafkaUrl.trim().length()==0){
+        if (kafkaUrl == null || kafkaUrl.trim().length() == 0) {
             return sendHttpController();
         } else {
             return sendKafkaController();
