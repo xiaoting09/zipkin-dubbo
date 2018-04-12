@@ -36,7 +36,7 @@ public class PropertiesUtils {
     /**
      * 手动添加路径加载Properties文件
      *
-     * @param confName
+     * @param confName 文件名称
      */
     public static void initProper(String confName) {
         InputStream defStream = PropertiesUtils.class.getClassLoader()

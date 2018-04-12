@@ -3,7 +3,10 @@
 zipKin测试用例
 
 ### dubbo接入方法:
-1.将dubbo-common打成jar添加依赖
+1.进入dubbo-common目录下将dubbo-common打成jar添加依赖 (需要本地安装gradle文件)
+```
+gradle clean install
+```
 
 2.在resources目录下新建META-INF/dubbo目录添加com.alibaba.dubbo.rpc.Filter文件
 

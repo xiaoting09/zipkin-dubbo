@@ -23,16 +23,16 @@ public abstract class DrpcAbstractInterceptor implements Filter {
     /**
      * 开始之前调用
      *
-     * @param invoker
-     * @param invocation
+     * @param invoker    invoker
+     * @param invocation invocation
      */
     public abstract void preHandle(Invoker<?> invoker, Invocation invocation);
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        preHandle(invoker,invocation);
+        preHandle(invoker, invocation);
         Result result = invoker.invoke(invocation);
-        afterCompletion(invoker,invocation);
+        afterCompletion(invoker, invocation);
         return result;
     }
 
